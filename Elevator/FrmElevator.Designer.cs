@@ -35,6 +35,7 @@
             this.level2btnUp = new System.Windows.Forms.Button();
             this.level2btnDown = new System.Windows.Forms.Button();
             this.floor1panel = new System.Windows.Forms.Panel();
+            this.lblElevatorDirection = new System.Windows.Forms.Label();
             this.level1btnUp = new System.Windows.Forms.Button();
             this.elevatorRope = new System.Windows.Forms.Panel();
             this.insideBtnPanel = new System.Windows.Forms.Panel();
@@ -119,12 +120,26 @@
             // floor1panel
             // 
             this.floor1panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.floor1panel.Controls.Add(this.lblElevatorDirection);
             this.floor1panel.Controls.Add(this.level1btnUp);
             this.floor1panel.Dock = System.Windows.Forms.DockStyle.Top;
             this.floor1panel.Location = new System.Drawing.Point(0, 300);
             this.floor1panel.Name = "floor1panel";
             this.floor1panel.Size = new System.Drawing.Size(772, 150);
             this.floor1panel.TabIndex = 3;
+            // 
+            // lblElevatorDirection
+            // 
+            this.lblElevatorDirection.AutoSize = true;
+            this.lblElevatorDirection.BackColor = System.Drawing.Color.Black;
+            this.lblElevatorDirection.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblElevatorDirection.Font = new System.Drawing.Font("MS UI Gothic", 14F);
+            this.lblElevatorDirection.ForeColor = System.Drawing.Color.Yellow;
+            this.lblElevatorDirection.Location = new System.Drawing.Point(0, 124);
+            this.lblElevatorDirection.Name = "lblElevatorDirection";
+            this.lblElevatorDirection.Size = new System.Drawing.Size(427, 24);
+            this.lblElevatorDirection.TabIndex = 1;
+            this.lblElevatorDirection.Text = "Elevator direction is currently heading : ↓";
             // 
             // level1btnUp
             // 
@@ -248,6 +263,7 @@
             this.floor3panel.ResumeLayout(false);
             this.floor2panel.ResumeLayout(false);
             this.floor1panel.ResumeLayout(false);
+            this.floor1panel.PerformLayout();
             this.insideBtnPanel.ResumeLayout(false);
             this.insideBtnPanel.PerformLayout();
             this.floorPanel.ResumeLayout(false);
@@ -273,6 +289,7 @@
         private System.Windows.Forms.Button button2insideLift;
         private System.Windows.Forms.Button button1insideLift;
         private System.Windows.Forms.Panel floorPanel;
+        private System.Windows.Forms.Label lblElevatorDirection;
     }
 }
 

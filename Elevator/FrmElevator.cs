@@ -33,12 +33,14 @@ namespace Elevator
         private const int ELEVATOR_SIZE = 100;
         private const int ELEVATOR_BUTTON_SIZE = 115;
 
+
         /// *******************************************************************
         /// エレベータアニメーションを管理するためのパラメータ
 
         private const int ELEVATOR_SPEED = 1;
-        private const int ELEVATOR_DELAY = 13;
+        private const int ELEVATOR_DELAY = 15;
         private const int ELEVATOR_DOOR_OPEN = 1500;
+        private const int ELEVATOR_LIMIT = 30;
 
         /// *******************************************************************
         /// エレベーターフォーム1のサイズを変更できるようにするためのパラメータ
@@ -50,7 +52,7 @@ namespace Elevator
         /// /// FrmElevatorの横幅
         /// </summary>
         private int intFormWidth;
-
+        private int intLevelPerFloor;
         //*******************************************************************
         /// ロジック・パラメータ
         /// <summary>
@@ -61,6 +63,9 @@ namespace Elevator
         /// エレベーターが止まっている階層（初期階層=1階）
         /// </summary>
         private int intCurrentFloor = 1;
+        private int intDestinationFloor = 1;
+        private string direction = "none";
+        private int intStopFloor = 0;
         /// <summary>
         /// 次に移動する
         /// </summary>
@@ -76,11 +81,25 @@ namespace Elevator
         /// true : デバッグモードオン
         /// </summary>
         private bool blnIsDebungging = true;
+        private bool blnStopElevator = false;
 
         /// <summary>
         /// 押されたボタン名をすべてqueQueryThreadingに入れる
         /// </summary>
         private Queue<int> queQueryThreading = new Queue<int>();
+        private Queue<int> queQueryThreadingDummy = new Queue<int>();
+        private List<ClsBtnProperty> buttonProperties = new List<ClsBtnProperty>();
+
+        private void CreateBtnProperties()
+        {
+            buttonProperties.Add(new ClsBtnProperty(1,"none", ClsEnums.ButtonName.firstFloorBtnInside));
+            buttonProperties.Add(new ClsBtnProperty(1, "up", ClsEnums.ButtonName.firstFloorUpBtn));
+            buttonProperties.Add(new ClsBtnProperty(2, "none", ClsEnums.ButtonName.secondFloorBtnInside));
+            buttonProperties.Add(new ClsBtnProperty(2, "up", ClsEnums.ButtonName.secondFloorUpBtn));
+            buttonProperties.Add(new ClsBtnProperty(2, "down", ClsEnums.ButtonName.secondFloorDownBtn));
+            buttonProperties.Add(new ClsBtnProperty(3, "none", ClsEnums.ButtonName.thirdFloorBtnInside));
+            buttonProperties.Add(new ClsBtnProperty(3, "down", ClsEnums.ButtonName.thirdFloorDownBtn));
+        }
 
 
         private void FrmElevator_Load(object sender, EventArgs e)
@@ -89,6 +108,8 @@ namespace Elevator
             intFormHeight = 500;
             intFormWidth = 1100;
 
+            intLevelPerFloor = intFormHeight / FLOOR_COUNT - TITLE_BAR_HEIGHT / FLOOR_COUNT;
+            CreateBtnProperties();
 
             Size = new Size(1100, 500);
 
@@ -241,7 +262,7 @@ namespace Elevator
             try
             {
                 MoveElevator2(level3btnDown, (int)ClsEnums.FloorNumber.thirdFloor,
-                (int)ClsEnums.ButtonName.thridFloorDownBtn);
+                (int)ClsEnums.ButtonName.thirdFloorDownBtn);
             }
             catch (Exception error)
             {
@@ -369,6 +390,8 @@ namespace Elevator
         {
             int destinationYPosition = ((intFormHeight / FLOOR_COUNT) * (FLOOR_COUNT - floorNumber)
                     - (TITLE_BAR_HEIGHT / FLOOR_COUNT) * (FLOOR_COUNT - floorNumber));
+            
+            intDestinationFloor = floorNumber;
 
             switch (floorNumber)
             {
@@ -376,6 +399,7 @@ namespace Elevator
                 case 1:
                     while (elevator.Location.Y < destinationYPosition)
                     {
+                        
                         IncrementElevator(destinationYPosition);
 
                     }
@@ -473,11 +497,52 @@ namespace Elevator
             }
         }
 
+        private int ChangeFloorWhenMoving(int elevatorY, bool isIncrement)
+        {
+            double currentHeight;
+            if (isIncrement)
+            {
+                currentHeight = elevatorY + ELEVATOR_LIMIT;
+            }
+            else
+            {
+                currentHeight = elevatorY - ELEVATOR_LIMIT;
+            }
+            double levelFloor = intLevelPerFloor;
+
+
+            if (isIncrement)
+            {
+                return FLOOR_COUNT - (int)Math.Floor(currentHeight / levelFloor);
+            }
+            else
+            {
+                return FLOOR_COUNT - (int)Math.Ceiling(currentHeight / levelFloor);
+            }
+
+            
+        }
+
+        void StopElevator()
+        {
+            Thread.Sleep(ELEVATOR_DOOR_OPEN);
+            Console.WriteLine("Elevator stopping");
+            blnStopElevator = false;
+            RemoveThisTag(intStopFloor);
+            intStopFloor = 0;
+        }
 
         private void IncrementElevator(int destinationHeight)
         {
             
-            //Console.WriteLine("current height : " + elevator.Location.Y + " ---- destination height : " + destinationHeight);
+            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, true);
+            direction = "down";
+
+            if(blnStopElevator == true && intStopFloor == intCurrentFloor)
+            {
+                StopElevator();
+                
+            }
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
@@ -492,7 +557,13 @@ namespace Elevator
 
         private void DecrementElevator(int destinationHeight)
         {
-            //Console.WriteLine("current height : " + elevator.Location.Y + " ---- destination height : " + destinationHeight);
+            direction = "up";
+            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, false);
+
+            if (blnStopElevator == true && intStopFloor == intCurrentFloor)
+            {
+                StopElevator();
+            }
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
@@ -561,7 +632,7 @@ namespace Elevator
                 case (int)ClsEnums.ButtonName.thirdFloorBtnInside:
                     button3insideLift.BackColor = Color.White;
                     break;
-                case (int)ClsEnums.ButtonName.thridFloorDownBtn :
+                case (int)ClsEnums.ButtonName.thirdFloorDownBtn :
                     level3btnDown.BackColor = Color.White;
                     break;
                 case (int)ClsEnums.ButtonName.secondFloorUpBtn:
@@ -587,10 +658,40 @@ namespace Elevator
         /// <remarks>
         /// Rev1.0.0 2022/05/10     作成者　：　Joshua Alviando
         /// </remarks>
+        /// 
+
+
+        private void RemoveThisTag(int tag)
+        {
+            queQueryThreadingDummy.Clear();
+            foreach (int i in queQueryThreading.ToArray())
+            {
+                if(i!= tag)
+                {
+                    queQueryThreadingDummy.Enqueue(i);
+                }
+            }
+
+
+            queQueryThreading.Clear();
+            queQueryThreading = queQueryThreadingDummy;
+            //Console.WriteLine(string.Join(",", queQueryThreading.ToArray()));
+            //Console.WriteLine(string.Join(",", queQueryThreadingDummy.ToArray()));
+        }
+
         private void TimerCallback(object source, System.Timers.ElapsedEventArgs e)
         {
 
             intCounterCount = intCounterCount + 1;
+            
+
+            //if (blnStopElevator)
+            //{
+            //    Thread.Sleep(500);
+            //    blnStopElevator = false;
+            //}
+
+
 
             ///以下のコードはデバッグ用です。///
             if (blnIsDebungging)
@@ -600,12 +701,63 @@ namespace Elevator
             ///以上のコードはデバッグ用です。///
 
 
+
+            int[] arr = queQueryThreading.ToArray();
+
+            
+            if (arr.Length > 0)
+            {
+                
+                for (int i = 0; i<arr.Length;i++)
+                {
+                    foreach (ClsBtnProperty btn in buttonProperties)
+                    {
+                        
+                        if ((int)btn.enumTag == arr[i])
+                        {
+                            
+                            if (intCurrentFloor < btn.floorDestination && btn.direction == direction || btn.direction == "none")
+                            {
+                                blnStopElevator = true;
+                                intStopFloor = btn.floorDestination;
+                            }
+                            else if (intCurrentFloor > btn.floorDestination && btn.direction == direction || btn.direction == "none")
+                            {
+                                blnStopElevator = true;
+                                intStopFloor = btn.floorDestination;
+                            }
+                        }
+                       
+                    }
+                }
+            }
+            
+
+            
+
+
+
+            if (intCurrentFloor < intDestinationFloor)
+            {
+
+                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↑"));
+
+            }
+            else
+            {
+                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↓"));
+            }
+
+
+
             if (!blnIsThreading && queQueryThreading.Count != 0)
             {
                 TurnOffLight(intCurrentQuery);
 
                 int dequeue = queQueryThreading.Dequeue();
                 intCurrentQuery = dequeue;
+
+                
                 
                 if (dequeue == 1)
                 {
@@ -663,8 +815,8 @@ namespace Elevator
         private void DebuggingMode()
         {
             //タイマー周期が何度回ったか
-            //this.Invoke(new Action(() => lblCounter.Text = intCounterCount.ToString()));
-            this.Invoke(new Action(() => lblCounter.Text = ""));
+            this.Invoke(new Action(() => lblCounter.Text = intCounterCount.ToString()));
+            //this.Invoke(new Action(() => lblCounter.Text = ""));
             if (this.InvokeRequired)
             {
 
@@ -708,5 +860,6 @@ namespace Elevator
                 }
             }
         }
+        
     }
 }

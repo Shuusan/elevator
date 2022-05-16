@@ -8,6 +8,8 @@ namespace Elevator
 {
     class ClsEnums
     {
+        
+        
         public enum FloorNumber{
             firstFloor = 1,
             secondFloor = 2,
@@ -19,10 +21,11 @@ namespace Elevator
             firstFloorBtnInside = 1,
             secondFloorBtnInside = 2,
             thirdFloorBtnInside = 3,
-            thridFloorDownBtn = 4,
+            thirdFloorDownBtn = 4,
             secondFloorUpBtn = 5,
             secondFloorDownBtn = 6,
             firstFloorUpBtn = 7,
         }
+        
     }
 }

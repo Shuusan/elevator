@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClsBtnProperty.cs" />
     <Compile Include="ClsElevatorMove.cs" />
     <Compile Include="ClsEnums.cs" />
     <Compile Include="FrmElevator.cs">
