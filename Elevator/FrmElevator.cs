@@ -36,9 +36,9 @@ namespace Elevator
         /// *******************************************************************
         /// エレベータアニメーションを管理するためのパラメータ
 
-        private const int ELEVATOR_SPEED = 3;
-        private const int ELEVATOR_DELAY = 7;
-        private const int ELEVATOR_DOOR_OPEN = 500;
+        private const int ELEVATOR_SPEED = 1;
+        private const int ELEVATOR_DELAY = 13;
+        private const int ELEVATOR_DOOR_OPEN = 1500;
 
         /// *******************************************************************
         /// エレベーターフォーム1のサイズを変更できるようにするためのパラメータ
@@ -75,7 +75,7 @@ namespace Elevator
         /// false : デバッグモードオフ
         /// true : デバッグモードオン
         /// </summary>
-        private bool blnIsDebungging = false;
+        private bool blnIsDebungging = true;
 
         /// <summary>
         /// 押されたボタン名をすべてqueQueryThreadingに入れる
@@ -663,7 +663,8 @@ namespace Elevator
         private void DebuggingMode()
         {
             //タイマー周期が何度回ったか
-            this.Invoke(new Action(() => lblCounter.Text = intCounterCount.ToString()));
+            //this.Invoke(new Action(() => lblCounter.Text = intCounterCount.ToString()));
+            this.Invoke(new Action(() => lblCounter.Text = ""));
             if (this.InvokeRequired)
             {
 
