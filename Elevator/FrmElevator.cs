@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Threading;
-
+using System.Linq;
 
 namespace Elevator
 {
@@ -38,11 +38,12 @@ namespace Elevator
         /// エレベータアニメーションを管理するためのパラメータ
 
         private const int ELEVATOR_SPEED = 1;
-        private const int ELEVATOR_DELAY = 15;
+        private const int ELEVATOR_DELAY = 1;
         private const int ELEVATOR_DOOR_OPEN = 1500;
         private const int ELEVATOR_LIMIT = 30;
 
         /// *******************************************************************
+       
         /// エレベーターフォーム1のサイズを変更できるようにするためのパラメータ
         /// <summary>
         /// FrmElevatorの高さ
@@ -64,8 +65,6 @@ namespace Elevator
         /// </summary>
         private int intCurrentFloor = 1;
         private int intDestinationFloor = 1;
-        private string direction = "none";
-        private int intStopFloor = 0;
         /// <summary>
         /// 次に移動する
         /// </summary>
@@ -81,27 +80,31 @@ namespace Elevator
         /// true : デバッグモードオン
         /// </summary>
         private bool blnIsDebungging = true;
-        private bool blnStopElevator = false;
 
         /// <summary>
         /// 押されたボタン名をすべてqueQueryThreadingに入れる
         /// </summary>
         private Queue<int> queQueryThreading = new Queue<int>();
-        private Queue<int> queQueryThreadingDummy = new Queue<int>();
         private List<ClsBtnProperty> buttonProperties = new List<ClsBtnProperty>();
+        private List<int> listCheckFloorUp = new List<int>();
+        private List<int> listCheckFloorDown = new List<int>();
+
+        private List<int> stopElevator = new List<int>();
+        private List<int> stopElevatorTag = new List<int>();
+
+        private int stopAtFloor = 0;
 
         private void CreateBtnProperties()
         {
             buttonProperties.Add(new ClsBtnProperty(1,"none", ClsEnums.ButtonName.firstFloorBtnInside));
-            buttonProperties.Add(new ClsBtnProperty(1, "up", ClsEnums.ButtonName.firstFloorUpBtn));
-            buttonProperties.Add(new ClsBtnProperty(2, "none", ClsEnums.ButtonName.secondFloorBtnInside));
+            buttonProperties.Add(new ClsBtnProperty(1, "none", ClsEnums.ButtonName.firstFloorUpBtn));
+            buttonProperties.Add(new ClsBtnProperty(2, "both", ClsEnums.ButtonName.secondFloorBtnInside));
             buttonProperties.Add(new ClsBtnProperty(2, "up", ClsEnums.ButtonName.secondFloorUpBtn));
             buttonProperties.Add(new ClsBtnProperty(2, "down", ClsEnums.ButtonName.secondFloorDownBtn));
             buttonProperties.Add(new ClsBtnProperty(3, "none", ClsEnums.ButtonName.thirdFloorBtnInside));
-            buttonProperties.Add(new ClsBtnProperty(3, "down", ClsEnums.ButtonName.thirdFloorDownBtn));
+            buttonProperties.Add(new ClsBtnProperty(3, "none", ClsEnums.ButtonName.thirdFloorDownBtn));
         }
-
-
+        
         private void FrmElevator_Load(object sender, EventArgs e)
         {
             //初期値
@@ -110,6 +113,23 @@ namespace Elevator
 
             intLevelPerFloor = intFormHeight / FLOOR_COUNT - TITLE_BAR_HEIGHT / FLOOR_COUNT;
             CreateBtnProperties();
+
+            foreach (ClsBtnProperty btn in buttonProperties)
+            {
+                if(btn.direction == "both")
+                {
+                    listCheckFloorDown.Add((int)btn.enumTag);
+                    listCheckFloorUp.Add((int)btn.enumTag);
+                }else if(btn.direction == "up")
+                {
+                    listCheckFloorUp.Add((int)btn.enumTag);
+                }
+                else if (btn.direction == "down")
+                {
+                    listCheckFloorDown.Add((int)btn.enumTag);
+                }
+                
+            }
 
             Size = new Size(1100, 500);
 
@@ -138,7 +158,6 @@ namespace Elevator
             
         }
         
-
         /// <summary>
         /// 目的の階層を指定する
         /// </summary>
@@ -162,15 +181,13 @@ namespace Elevator
             }
 
         }
-
-       
+        
         /// <summary>
         /// 目的の階層を指定する
         /// </summary>
         /// <param name="btn">上りボタン下りボタン、</param>
         /// <param name="floorDestination">行き先階</param>
         /// <param name="btnName">ボタンのタグ</param>
-        
         private void MoveElevator2(Button btn, int floorDestination, int btnName)
         {
             try
@@ -194,7 +211,7 @@ namespace Elevator
             }
             
         }
-
+        
         /// <summary>
         /// 1ボタン
         /// </summary>
@@ -270,8 +287,7 @@ namespace Elevator
             }
             
         }
-
-
+        
         /// <summary>
         /// ２階の上りボタン
         /// </summary>
@@ -328,7 +344,6 @@ namespace Elevator
             
         }
         
-
         /// <summary>
         /// リサイズ可能なフォーム1を実現する関数です。
         /// </summary>
@@ -376,8 +391,6 @@ namespace Elevator
             SetElevator((intFormHeight / FLOOR_COUNT) * (FLOOR_COUNT - intCurrentFloor) - 
                 (TITLE_BAR_HEIGHT / FLOOR_COUNT) * (3 - intCurrentFloor));
         }
-
-
 
         /// <summary>
         /// エレベーターを特定の階に移動させるアニメーション
@@ -459,8 +472,7 @@ namespace Elevator
                 RefreshInvoke();
             }
         }
-
-
+        
         /// <summary>
         /// スレッド化されていない時にエレベータをキューに入れたりアニメートさせる関数
         /// </summary>
@@ -497,85 +509,6 @@ namespace Elevator
             }
         }
 
-        private int ChangeFloorWhenMoving(int elevatorY, bool isIncrement)
-        {
-            double currentHeight;
-            if (isIncrement)
-            {
-                currentHeight = elevatorY + ELEVATOR_LIMIT;
-            }
-            else
-            {
-                currentHeight = elevatorY - ELEVATOR_LIMIT;
-            }
-            double levelFloor = intLevelPerFloor;
-
-
-            if (isIncrement)
-            {
-                return FLOOR_COUNT - (int)Math.Floor(currentHeight / levelFloor);
-            }
-            else
-            {
-                return FLOOR_COUNT - (int)Math.Ceiling(currentHeight / levelFloor);
-            }
-
-            
-        }
-
-        void StopElevator()
-        {
-            Thread.Sleep(ELEVATOR_DOOR_OPEN);
-            Console.WriteLine("Elevator stopping");
-            blnStopElevator = false;
-            RemoveThisTag(intStopFloor);
-            intStopFloor = 0;
-        }
-
-        private void IncrementElevator(int destinationHeight)
-        {
-            
-            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, true);
-            direction = "down";
-
-            if(blnStopElevator == true && intStopFloor == intCurrentFloor)
-            {
-                StopElevator();
-                
-            }
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
-                    elevator.Location.Y + ELEVATOR_SPEED)));
-            }
-            else
-            {
-                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y + ELEVATOR_SPEED);
-            }
-            Thread.Sleep(ELEVATOR_DELAY);
-        }
-
-        private void DecrementElevator(int destinationHeight)
-        {
-            direction = "up";
-            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, false);
-
-            if (blnStopElevator == true && intStopFloor == intCurrentFloor)
-            {
-                StopElevator();
-            }
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
-                    elevator.Location.Y - ELEVATOR_SPEED)));
-            }
-            else
-            {
-                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y - ELEVATOR_SPEED);
-            }
-            Thread.Sleep(ELEVATOR_DELAY);
-        }
-
         /// <summary>
         /// 画面サイズ変更時にエレベーターの位置を調整する
         /// </summary>
@@ -592,7 +525,6 @@ namespace Elevator
             }
         }
 
-
         /// <summary>
         /// この関数は、リボーク関数をより短くするためのものです。
         /// </summary>
@@ -608,7 +540,6 @@ namespace Elevator
             }
         }
 
-
         /// <summary>
         /// 消灯機能
         /// </summary>
@@ -622,7 +553,7 @@ namespace Elevator
         {
             switch (currentQuery)
             {
-                
+
                 case (int)ClsEnums.ButtonName.firstFloorBtnInside:
                     button1insideLift.BackColor = Color.White;
                     break;
@@ -632,7 +563,7 @@ namespace Elevator
                 case (int)ClsEnums.ButtonName.thirdFloorBtnInside:
                     button3insideLift.BackColor = Color.White;
                     break;
-                case (int)ClsEnums.ButtonName.thirdFloorDownBtn :
+                case (int)ClsEnums.ButtonName.thirdFloorDownBtn:
                     level3btnDown.BackColor = Color.White;
                     break;
                 case (int)ClsEnums.ButtonName.secondFloorUpBtn:
@@ -648,164 +579,7 @@ namespace Elevator
                     break;
             }
         }
-
-
-        /// <summary>
-        /// 関数でスレッドを管理する。
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="e"></param>
-        /// <remarks>
-        /// Rev1.0.0 2022/05/10     作成者　：　Joshua Alviando
-        /// </remarks>
-        /// 
-
-
-        private void RemoveThisTag(int tag)
-        {
-            queQueryThreadingDummy.Clear();
-            foreach (int i in queQueryThreading.ToArray())
-            {
-                if(i!= tag)
-                {
-                    queQueryThreadingDummy.Enqueue(i);
-                }
-            }
-
-
-            queQueryThreading.Clear();
-            queQueryThreading = queQueryThreadingDummy;
-            //Console.WriteLine(string.Join(",", queQueryThreading.ToArray()));
-            //Console.WriteLine(string.Join(",", queQueryThreadingDummy.ToArray()));
-        }
-
-        private void TimerCallback(object source, System.Timers.ElapsedEventArgs e)
-        {
-
-            intCounterCount = intCounterCount + 1;
-            
-
-            //if (blnStopElevator)
-            //{
-            //    Thread.Sleep(500);
-            //    blnStopElevator = false;
-            //}
-
-
-
-            ///以下のコードはデバッグ用です。///
-            if (blnIsDebungging)
-            {
-                DebuggingMode();
-            }
-            ///以上のコードはデバッグ用です。///
-
-
-
-            int[] arr = queQueryThreading.ToArray();
-
-            
-            if (arr.Length > 0)
-            {
-                
-                for (int i = 0; i<arr.Length;i++)
-                {
-                    foreach (ClsBtnProperty btn in buttonProperties)
-                    {
-                        
-                        if ((int)btn.enumTag == arr[i])
-                        {
-                            
-                            if (intCurrentFloor < btn.floorDestination && btn.direction == direction || btn.direction == "none")
-                            {
-                                blnStopElevator = true;
-                                intStopFloor = btn.floorDestination;
-                            }
-                            else if (intCurrentFloor > btn.floorDestination && btn.direction == direction || btn.direction == "none")
-                            {
-                                blnStopElevator = true;
-                                intStopFloor = btn.floorDestination;
-                            }
-                        }
-                       
-                    }
-                }
-            }
-            
-
-            
-
-
-
-            if (intCurrentFloor < intDestinationFloor)
-            {
-
-                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↑"));
-
-            }
-            else
-            {
-                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↓"));
-            }
-
-
-
-            if (!blnIsThreading && queQueryThreading.Count != 0)
-            {
-                TurnOffLight(intCurrentQuery);
-
-                int dequeue = queQueryThreading.Dequeue();
-                intCurrentQuery = dequeue;
-
-                
-                
-                if (dequeue == 1)
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.firstFloor));
-                    t.Start();
-                }
-                else if (dequeue == 2)
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.secondFloor));
-                    t.Start();
-                }
-                else if (dequeue == 3)
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.thirdFloor));
-                    t.Start();
-                }
-                else if (dequeue == 4)
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.thirdFloor));
-                    t.Start();
-                }
-                else if (dequeue == 5)
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.secondFloor));
-                    t.Start();
-                }
-                else if (dequeue == 6)
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.secondFloor));
-                    t.Start();
-                }
-                else
-                {
-                    blnIsThreading = true;
-                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.firstFloor));
-                    t.Start();
-                }
-            }
-
-        }
-
-
+        
         /// <summary>
         /// デバッグ画面を実行するための関数
         /// </summary>
@@ -861,5 +635,268 @@ namespace Elevator
             }
         }
         
+        private void InterruptStopElevator(string direction)
+        {
+            if(stopElevator.Count != 0 && stopAtFloor == 0 )
+            {
+                stopAtFloor = stopElevator.First();
+                stopElevator.RemoveAt(0);
+                stopElevatorTag.RemoveAt(0);
+
+            }
+
+            if(intLevelPerFloor-ELEVATOR_SPEED < elevator.Location.Y && elevator.Location.Y < intLevelPerFloor+ELEVATOR_SPEED && stopAtFloor != 0)
+            {
+                Thread.Sleep(ELEVATOR_DOOR_OPEN);
+
+                
+                foreach(ClsBtnProperty btnProp in buttonProperties)
+                {
+                    if (btnProp.floorDestination == stopAtFloor && (btnProp.direction == direction || btnProp.direction == "both"))
+                    {
+                        TurnOffLight((int)btnProp.enumTag);
+                    }
+                }
+                
+
+                stopAtFloor = 0;
+            }
+        }
+
+        private void ElevatorHeadingInterrupt(string heading)
+        {
+            if(heading == "up")
+            {
+                Queue<int> que = new Queue<int>();
+                foreach (int btnTag in listCheckFloorUp)
+                {
+                    if (queQueryThreading.Contains(btnTag))
+                    {
+                        
+                        foreach (int i in queQueryThreading.ToArray())
+                        {
+                            if(i != btnTag)
+                            {
+                                que.Enqueue(i);
+                            }
+                            else
+                            {
+                                foreach (ClsBtnProperty btn in buttonProperties)
+                                {
+                                    if ((int)btn.enumTag == btnTag)
+                                    {
+                                        if(btn.floorDestination > intCurrentFloor)
+                                        {
+                                            stopElevator.Add(btn.floorDestination);
+                                            stopElevatorTag.Add(btnTag);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            que.Enqueue(i);
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+                        queQueryThreading.Clear();
+                        queQueryThreading = que;
+                    }
+                }
+
+            }
+            else if(heading == "down")
+            {
+                Queue<int> que = new Queue<int>();
+                foreach (int btnTag in listCheckFloorDown)
+                {
+                    if (queQueryThreading.Contains(btnTag))
+                    {
+                        foreach (int i in queQueryThreading.ToArray())
+                        {
+                            if (i != btnTag)
+                            {
+                                que.Enqueue(i);
+                            }
+                            else
+                            {
+                                foreach (ClsBtnProperty btn in buttonProperties)
+                                {
+                                    if ((int)btn.enumTag == btnTag)
+                                    {
+                                        if (btn.floorDestination < intCurrentFloor)
+                                        {
+                                            stopElevator.Add(btn.floorDestination);
+                                            stopElevatorTag.Add(btnTag);
+                                            break;
+
+                                        }
+                                        else
+                                        {
+                                            que.Enqueue(i);
+                                        }
+                                    }
+                                        
+                                }
+                            }
+                        }
+                        queQueryThreading.Clear();
+                        queQueryThreading = que;
+                    }
+                }
+            }   
+        }
+        
+        private void IncrementElevator(int destinationHeight)
+        {
+            
+            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, true);
+            ElevatorHeadingInterrupt("down");
+            InterruptStopElevator("down");
+
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
+                    elevator.Location.Y + ELEVATOR_SPEED)));
+            }
+            else
+            {
+                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y + ELEVATOR_SPEED);
+            }
+            Thread.Sleep(ELEVATOR_DELAY);
+        }
+        
+        private void DecrementElevator(int destinationHeight)
+        {
+            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, false);
+            ElevatorHeadingInterrupt("up");
+            InterruptStopElevator("up");
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
+                    elevator.Location.Y - ELEVATOR_SPEED)));
+            }
+            else
+            {
+                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y - ELEVATOR_SPEED);
+            }
+            Thread.Sleep(ELEVATOR_DELAY);
+        }
+        
+        private int ChangeFloorWhenMoving(int elevatorY, bool isIncrement)
+        {
+            double currentHeight;
+            if (isIncrement)
+            {
+                currentHeight = elevatorY + ELEVATOR_LIMIT;
+            }
+            else
+            {
+                currentHeight = elevatorY - ELEVATOR_LIMIT;
+            }
+            
+
+            
+            Console.WriteLine(currentHeight / intLevelPerFloor);
+            if (isIncrement)
+            {
+                Console.WriteLine(FLOOR_COUNT - (int)Math.Floor(currentHeight / intLevelPerFloor));
+                return FLOOR_COUNT - (int)Math.Floor(currentHeight / intLevelPerFloor);
+            }
+            else
+            {
+                Console.WriteLine(FLOOR_COUNT - (int)Math.Ceiling(currentHeight / intLevelPerFloor));
+                return FLOOR_COUNT - (int)Math.Ceiling(currentHeight / intLevelPerFloor);
+            }
+
+
+        }
+        
+        /// <summary>
+        /// 関数でスレッドを管理する。
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        /// <remarks>
+        /// Rev1.0.0 2022/05/10     作成者　：　Joshua Alviando
+        /// </remarks>
+        private void TimerCallback(object source, System.Timers.ElapsedEventArgs e)
+        {
+            
+            ///以下のコードはデバッグ用です。///
+            if (blnIsDebungging)
+            {
+                intCounterCount = intCounterCount + 1;
+                //Console.WriteLine("current query : " + string.Join(",", queQueryThreading.ToArray()));
+                //Console.WriteLine("stop at : " + string.Join(",", stopElevatorTag));
+                DebuggingMode();
+            }
+            ///以上のコードはデバッグ用です。///
+
+
+            ///Changing elevator direction///
+            if (intCurrentFloor < intDestinationFloor)
+            {
+
+                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↑"));
+
+            }
+            else
+            {
+                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↓"));
+            }
+            
+            if (!blnIsThreading && queQueryThreading.Count != 0)
+            {
+                TurnOffLight(intCurrentQuery);
+
+                int dequeue = queQueryThreading.Dequeue();
+                intCurrentQuery = dequeue;
+                
+                if (dequeue == 1)
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.firstFloor));
+                    t.Start();
+                }
+                else if (dequeue == 2)
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.secondFloor));
+                    t.Start();
+                }
+                else if (dequeue == 3)
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.thirdFloor));
+                    t.Start();
+                }
+                else if (dequeue == 4)
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.thirdFloor));
+                    t.Start();
+                }
+                else if (dequeue == 5)
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.secondFloor));
+                    t.Start();
+                }
+                else if (dequeue == 6)
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.secondFloor));
+                    t.Start();
+                }
+                else
+                {
+                    blnIsThreading = true;
+                    Thread t = new Thread(() => MoveToFloor((int)ClsEnums.FloorNumber.firstFloor));
+                    t.Start();
+                }
+            }
+        }
     }
 }
