@@ -79,21 +79,46 @@ namespace Elevator
         /// false : デバッグモードオフ
         /// true : デバッグモードオン
         /// </summary>
-        private bool blnIsDebungging = true;
+        private bool blnIsDebungging = false;
 
         /// <summary>
         /// 押されたボタン名をすべてqueQueryThreadingに入れる
         /// </summary>
         private Queue<int> queQueryThreading = new Queue<int>();
+
+        /// <summary>
+        /// 全種類のボタン一覧
+        /// </summary>
         private List<ClsBtnProperty> buttonProperties = new List<ClsBtnProperty>();
+
+        /// <summary>
+        /// エレベータ上昇時に考慮すべき全ボタンタグのリスト
+        /// </summary>
         private List<int> listCheckFloorUp = new List<int>();
+
+        /// <summary>
+        /// エレベータ下降時に考慮すべき全ボタンタグのリスト
+        /// </summary>
         private List<int> listCheckFloorDown = new List<int>();
 
+        /// <summary>
+        /// エレベータが停止する全階のリスト
+        /// </summary>
         private List<int> stopElevator = new List<int>();
+
+        /// <summary>
+        /// オフにする必要があるすべてのタグボタンのリスト
+        /// </summary>
         private List<int> stopElevatorTag = new List<int>();
 
+        /// <summary>
+        /// 次の階で停止する
+        /// </summary>
         private int stopAtFloor = 0;
 
+        /// <summary>
+        /// ボタンの種類をすべて設定する
+        /// </summary>
         private void CreateBtnProperties()
         {
             buttonProperties.Add(new ClsBtnProperty(1,"none", ClsEnums.ButtonName.firstFloorBtnInside));
@@ -371,11 +396,11 @@ namespace Elevator
             else
             {
                 //　画面サイズを調整する
-                int perFloorHeight = intFormHeight / FLOOR_COUNT - TITLE_BAR_HEIGHT / FLOOR_COUNT;
+                intLevelPerFloor = intFormHeight / FLOOR_COUNT - TITLE_BAR_HEIGHT / FLOOR_COUNT;
 
                 floorPanel.Size = new Size(intFormWidth, intFormHeight);
                 elevatorRope.Size = new Size(ELEVATOR_ROPE_SIZE, intFormHeight);
-                elevator.Size = new Size(ELEVATOR_SIZE, perFloorHeight);
+                elevator.Size = new Size(ELEVATOR_SIZE, intLevelPerFloor);
                 insideBtnPanel.Size = new Size(ELEVATOR_BUTTON_SIZE, intFormHeight);
 
                 Panel[] pnlFloorList = { floor1panel, floor2panel, floor3panel };
@@ -383,7 +408,7 @@ namespace Elevator
                 // floor(i)panelのサイズを調整する
                 for (int i = 1; i <= FLOOR_COUNT; i++)
                 {
-                    pnlFloorList[i - 1].Height = perFloorHeight;
+                    pnlFloorList[i - 1].Height = intLevelPerFloor;
                 }
             }
 
@@ -634,7 +659,13 @@ namespace Elevator
                 }
             }
         }
-        
+
+        /// <summary>
+        /// エレベータ移動中に押されたボタンがあれば、その階でエレベータを停止する
+        /// </summary>
+        /// <param name="direction">
+        /// エレベーターは今どこに向かっているのか
+        /// </param>
         private void InterruptStopElevator(string direction)
         {
             if(stopElevator.Count != 0 && stopAtFloor == 0 )
@@ -663,9 +694,15 @@ namespace Elevator
             }
         }
 
-        private void ElevatorHeadingInterrupt(string heading)
+        /// <summary>
+        /// エレベーターの停止位置のリストを作成する
+        /// </summary>
+        /// <param name="direction">
+        /// エレベーターは今どこに向かっているのか
+        /// </param>
+        private void ElevatorHeadingInterrupt(string direction)
         {
-            if(heading == "up")
+            if(direction == "up")
             {
                 Queue<int> que = new Queue<int>();
                 foreach (int btnTag in listCheckFloorUp)
@@ -695,7 +732,6 @@ namespace Elevator
                                         {
                                             que.Enqueue(i);
                                         }
-                                        
                                     }
                                 }
                             }
@@ -706,7 +742,7 @@ namespace Elevator
                 }
 
             }
-            else if(heading == "down")
+            else if(direction == "down")
             {
                 Queue<int> que = new Queue<int>();
                 foreach (int btnTag in listCheckFloorDown)
@@ -748,42 +784,16 @@ namespace Elevator
             }   
         }
         
-        private void IncrementElevator(int destinationHeight)
-        {
-            
-            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, true);
-            ElevatorHeadingInterrupt("down");
-            InterruptStopElevator("down");
-
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
-                    elevator.Location.Y + ELEVATOR_SPEED)));
-            }
-            else
-            {
-                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y + ELEVATOR_SPEED);
-            }
-            Thread.Sleep(ELEVATOR_DELAY);
-        }
-        
-        private void DecrementElevator(int destinationHeight)
-        {
-            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, false);
-            ElevatorHeadingInterrupt("up");
-            InterruptStopElevator("up");
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X, 
-                    elevator.Location.Y - ELEVATOR_SPEED)));
-            }
-            else
-            {
-                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y - ELEVATOR_SPEED);
-            }
-            Thread.Sleep(ELEVATOR_DELAY);
-        }
-        
+        /// <summary>
+        /// 現在の階を判断し、エレベーターの方向を設定する
+        /// </summary>
+        /// <param name="elevatorY">
+        /// 現在のエレベーターのレベル
+        /// </param>
+        /// <param name="isIncrement">
+        /// 呼び出し元がインクリメント関数であるかどうかをチェックする
+        /// </param>
+        /// <returns></returns>
         private int ChangeFloorWhenMoving(int elevatorY, bool isIncrement)
         {
             double currentHeight;
@@ -801,12 +811,10 @@ namespace Elevator
             Console.WriteLine(currentHeight / intLevelPerFloor);
             if (isIncrement)
             {
-                Console.WriteLine(FLOOR_COUNT - (int)Math.Floor(currentHeight / intLevelPerFloor));
                 return FLOOR_COUNT - (int)Math.Floor(currentHeight / intLevelPerFloor);
             }
             else
             {
-                Console.WriteLine(FLOOR_COUNT - (int)Math.Ceiling(currentHeight / intLevelPerFloor));
                 return FLOOR_COUNT - (int)Math.Ceiling(currentHeight / intLevelPerFloor);
             }
 
@@ -898,5 +906,55 @@ namespace Elevator
                 }
             }
         }
+
+        /// <summary>
+        /// エレベーターを上方向に動かす
+        /// </summary>
+        /// <param name="destinationHeight">
+        /// エレベータターゲットのYレベル
+        /// </param>
+        private void IncrementElevator(int destinationHeight)
+        {
+
+            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, true);
+            ElevatorHeadingInterrupt("down");
+            InterruptStopElevator("down");
+
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X,
+                    elevator.Location.Y + ELEVATOR_SPEED)));
+            }
+            else
+            {
+                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y + ELEVATOR_SPEED);
+            }
+            Thread.Sleep(ELEVATOR_DELAY);
+        }
+        
+        /// <summary>
+        /// エレベーターを下方向に動かす
+        /// </summary>
+        /// <param name="destinationHeight">
+        /// エレベータターゲットのYレベル
+        /// </param>
+        private void DecrementElevator(int destinationHeight)
+        {
+            intCurrentFloor = ChangeFloorWhenMoving(elevator.Location.Y, false);
+            ElevatorHeadingInterrupt("up");
+            InterruptStopElevator("up");
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => elevator.Location = new Point(elevator.Location.X,
+                    elevator.Location.Y - ELEVATOR_SPEED)));
+            }
+            else
+            {
+                elevator.Location = new Point(elevator.Location.X, elevator.Location.Y - ELEVATOR_SPEED);
+            }
+            Thread.Sleep(ELEVATOR_DELAY);
+        }
+
+
     }
 }
