@@ -29,16 +29,28 @@
         private void InitializeComponent()
         {
             this.floor3panel = new System.Windows.Forms.Panel();
+            this.doorRight3floor = new System.Windows.Forms.Panel();
+            this.doorLeft3floor = new System.Windows.Forms.Panel();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.level3btnDown = new System.Windows.Forms.Button();
+            this.lblElevatorDirection3floor = new System.Windows.Forms.Label();
             this.elevator = new System.Windows.Forms.Panel();
             this.floor2panel = new System.Windows.Forms.Panel();
+            this.doorRight2floor = new System.Windows.Forms.Panel();
+            this.doorLeft2floor = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.lblElevatorDirection2floor = new System.Windows.Forms.Label();
             this.level2btnUp = new System.Windows.Forms.Button();
             this.level2btnDown = new System.Windows.Forms.Button();
             this.floor1panel = new System.Windows.Forms.Panel();
-            this.lblElevatorDirection = new System.Windows.Forms.Label();
+            this.doorRight1floor = new System.Windows.Forms.Panel();
+            this.doorLeft1floor = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.lblElevatorDirection1floor = new System.Windows.Forms.Label();
             this.level1btnUp = new System.Windows.Forms.Button();
             this.elevatorRope = new System.Windows.Forms.Panel();
             this.insideBtnPanel = new System.Windows.Forms.Panel();
+            this.lblElevatorDirection = new System.Windows.Forms.Label();
             this.lblCounter = new System.Windows.Forms.Label();
             this.lblQueuing = new System.Windows.Forms.Label();
             this.lblQuery = new System.Windows.Forms.Label();
@@ -46,33 +58,85 @@
             this.button2insideLift = new System.Windows.Forms.Button();
             this.button1insideLift = new System.Windows.Forms.Button();
             this.floorPanel = new System.Windows.Forms.Panel();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.panel6 = new System.Windows.Forms.Panel();
             this.floor3panel.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.floor2panel.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.floor1panel.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.insideBtnPanel.SuspendLayout();
             this.floorPanel.SuspendLayout();
+            this.panel4.SuspendLayout();
+            this.panel5.SuspendLayout();
+            this.panel6.SuspendLayout();
             this.SuspendLayout();
             // 
             // floor3panel
             // 
             this.floor3panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.floor3panel.Controls.Add(this.level3btnDown);
+            this.floor3panel.Controls.Add(this.panel6);
+            this.floor3panel.Controls.Add(this.panel1);
             this.floor3panel.Dock = System.Windows.Forms.DockStyle.Top;
             this.floor3panel.Location = new System.Drawing.Point(0, 0);
             this.floor3panel.Name = "floor3panel";
             this.floor3panel.Size = new System.Drawing.Size(772, 150);
             this.floor3panel.TabIndex = 1;
             // 
+            // doorRight3floor
+            // 
+            this.doorRight3floor.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.doorRight3floor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.doorRight3floor.Dock = System.Windows.Forms.DockStyle.Right;
+            this.doorRight3floor.Location = new System.Drawing.Point(62, 0);
+            this.doorRight3floor.Name = "doorRight3floor";
+            this.doorRight3floor.Size = new System.Drawing.Size(58, 148);
+            this.doorRight3floor.TabIndex = 3;
+            // 
+            // doorLeft3floor
+            // 
+            this.doorLeft3floor.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.doorLeft3floor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.doorLeft3floor.Dock = System.Windows.Forms.DockStyle.Left;
+            this.doorLeft3floor.Location = new System.Drawing.Point(0, 0);
+            this.doorLeft3floor.Name = "doorLeft3floor";
+            this.doorLeft3floor.Size = new System.Drawing.Size(62, 148);
+            this.doorLeft3floor.TabIndex = 2;
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.panel1.Controls.Add(this.level3btnDown);
+            this.panel1.Controls.Add(this.lblElevatorDirection3floor);
+            this.panel1.Location = new System.Drawing.Point(137, 1);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(75, 150);
+            this.panel1.TabIndex = 1;
+            // 
             // level3btnDown
             // 
             this.level3btnDown.BackColor = System.Drawing.Color.White;
-            this.level3btnDown.Location = new System.Drawing.Point(32, 46);
+            this.level3btnDown.Location = new System.Drawing.Point(13, 92);
             this.level3btnDown.Name = "level3btnDown";
             this.level3btnDown.Size = new System.Drawing.Size(50, 49);
             this.level3btnDown.TabIndex = 0;
             this.level3btnDown.Text = "↓";
             this.level3btnDown.UseVisualStyleBackColor = false;
             this.level3btnDown.Click += new System.EventHandler(this.Level3btnDown_Click);
+            // 
+            // lblElevatorDirection3floor
+            // 
+            this.lblElevatorDirection3floor.AutoSize = true;
+            this.lblElevatorDirection3floor.BackColor = System.Drawing.Color.Black;
+            this.lblElevatorDirection3floor.Font = new System.Drawing.Font("MS UI Gothic", 14F);
+            this.lblElevatorDirection3floor.ForeColor = System.Drawing.Color.Yellow;
+            this.lblElevatorDirection3floor.Location = new System.Drawing.Point(9, 45);
+            this.lblElevatorDirection3floor.Name = "lblElevatorDirection3floor";
+            this.lblElevatorDirection3floor.Size = new System.Drawing.Size(60, 24);
+            this.lblElevatorDirection3floor.TabIndex = 1;
+            this.lblElevatorDirection3floor.Text = " 3 ↓";
             // 
             // elevator
             // 
@@ -87,18 +151,61 @@
             // floor2panel
             // 
             this.floor2panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.floor2panel.Controls.Add(this.level2btnUp);
-            this.floor2panel.Controls.Add(this.level2btnDown);
+            this.floor2panel.Controls.Add(this.panel5);
+            this.floor2panel.Controls.Add(this.panel2);
             this.floor2panel.Dock = System.Windows.Forms.DockStyle.Top;
             this.floor2panel.Location = new System.Drawing.Point(0, 150);
             this.floor2panel.Name = "floor2panel";
             this.floor2panel.Size = new System.Drawing.Size(772, 150);
             this.floor2panel.TabIndex = 2;
             // 
+            // doorRight2floor
+            // 
+            this.doorRight2floor.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.doorRight2floor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.doorRight2floor.Dock = System.Windows.Forms.DockStyle.Right;
+            this.doorRight2floor.Location = new System.Drawing.Point(62, 0);
+            this.doorRight2floor.Name = "doorRight2floor";
+            this.doorRight2floor.Size = new System.Drawing.Size(58, 148);
+            this.doorRight2floor.TabIndex = 3;
+            // 
+            // doorLeft2floor
+            // 
+            this.doorLeft2floor.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.doorLeft2floor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.doorLeft2floor.Dock = System.Windows.Forms.DockStyle.Left;
+            this.doorLeft2floor.Location = new System.Drawing.Point(0, 0);
+            this.doorLeft2floor.Name = "doorLeft2floor";
+            this.doorLeft2floor.Size = new System.Drawing.Size(62, 148);
+            this.doorLeft2floor.TabIndex = 2;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.panel2.Controls.Add(this.lblElevatorDirection2floor);
+            this.panel2.Controls.Add(this.level2btnUp);
+            this.panel2.Controls.Add(this.level2btnDown);
+            this.panel2.Location = new System.Drawing.Point(137, -1);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(75, 150);
+            this.panel2.TabIndex = 1;
+            // 
+            // lblElevatorDirection2floor
+            // 
+            this.lblElevatorDirection2floor.AutoSize = true;
+            this.lblElevatorDirection2floor.BackColor = System.Drawing.Color.Black;
+            this.lblElevatorDirection2floor.Font = new System.Drawing.Font("MS UI Gothic", 14F);
+            this.lblElevatorDirection2floor.ForeColor = System.Drawing.Color.Yellow;
+            this.lblElevatorDirection2floor.Location = new System.Drawing.Point(7, 15);
+            this.lblElevatorDirection2floor.Name = "lblElevatorDirection2floor";
+            this.lblElevatorDirection2floor.Size = new System.Drawing.Size(60, 24);
+            this.lblElevatorDirection2floor.TabIndex = 2;
+            this.lblElevatorDirection2floor.Text = " 3 ↓";
+            // 
             // level2btnUp
             // 
             this.level2btnUp.BackColor = System.Drawing.Color.White;
-            this.level2btnUp.Location = new System.Drawing.Point(32, 20);
+            this.level2btnUp.Location = new System.Drawing.Point(13, 51);
             this.level2btnUp.Name = "level2btnUp";
             this.level2btnUp.Size = new System.Drawing.Size(50, 49);
             this.level2btnUp.TabIndex = 0;
@@ -109,7 +216,7 @@
             // level2btnDown
             // 
             this.level2btnDown.BackColor = System.Drawing.Color.White;
-            this.level2btnDown.Location = new System.Drawing.Point(32, 84);
+            this.level2btnDown.Location = new System.Drawing.Point(13, 100);
             this.level2btnDown.Name = "level2btnDown";
             this.level2btnDown.Size = new System.Drawing.Size(50, 49);
             this.level2btnDown.TabIndex = 0;
@@ -120,31 +227,59 @@
             // floor1panel
             // 
             this.floor1panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.floor1panel.Controls.Add(this.lblElevatorDirection);
-            this.floor1panel.Controls.Add(this.level1btnUp);
+            this.floor1panel.Controls.Add(this.panel4);
+            this.floor1panel.Controls.Add(this.panel3);
             this.floor1panel.Dock = System.Windows.Forms.DockStyle.Top;
             this.floor1panel.Location = new System.Drawing.Point(0, 300);
             this.floor1panel.Name = "floor1panel";
             this.floor1panel.Size = new System.Drawing.Size(772, 150);
             this.floor1panel.TabIndex = 3;
             // 
-            // lblElevatorDirection
+            // doorRight1floor
             // 
-            this.lblElevatorDirection.AutoSize = true;
-            this.lblElevatorDirection.BackColor = System.Drawing.Color.Black;
-            this.lblElevatorDirection.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.lblElevatorDirection.Font = new System.Drawing.Font("MS UI Gothic", 14F);
-            this.lblElevatorDirection.ForeColor = System.Drawing.Color.Yellow;
-            this.lblElevatorDirection.Location = new System.Drawing.Point(0, 124);
-            this.lblElevatorDirection.Name = "lblElevatorDirection";
-            this.lblElevatorDirection.Size = new System.Drawing.Size(427, 24);
-            this.lblElevatorDirection.TabIndex = 1;
-            this.lblElevatorDirection.Text = "Elevator direction is currently heading : ↓";
+            this.doorRight1floor.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.doorRight1floor.Dock = System.Windows.Forms.DockStyle.Right;
+            this.doorRight1floor.Location = new System.Drawing.Point(62, 0);
+            this.doorRight1floor.Name = "doorRight1floor";
+            this.doorRight1floor.Size = new System.Drawing.Size(58, 148);
+            this.doorRight1floor.TabIndex = 4;
+            // 
+            // doorLeft1floor
+            // 
+            this.doorLeft1floor.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.doorLeft1floor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.doorLeft1floor.Dock = System.Windows.Forms.DockStyle.Left;
+            this.doorLeft1floor.Location = new System.Drawing.Point(0, 0);
+            this.doorLeft1floor.Name = "doorLeft1floor";
+            this.doorLeft1floor.Size = new System.Drawing.Size(62, 148);
+            this.doorLeft1floor.TabIndex = 3;
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.panel3.Controls.Add(this.lblElevatorDirection1floor);
+            this.panel3.Controls.Add(this.level1btnUp);
+            this.panel3.Location = new System.Drawing.Point(137, 1);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(75, 148);
+            this.panel3.TabIndex = 2;
+            // 
+            // lblElevatorDirection1floor
+            // 
+            this.lblElevatorDirection1floor.AutoSize = true;
+            this.lblElevatorDirection1floor.BackColor = System.Drawing.Color.Black;
+            this.lblElevatorDirection1floor.Font = new System.Drawing.Font("MS UI Gothic", 14F);
+            this.lblElevatorDirection1floor.ForeColor = System.Drawing.Color.Yellow;
+            this.lblElevatorDirection1floor.Location = new System.Drawing.Point(8, 28);
+            this.lblElevatorDirection1floor.Name = "lblElevatorDirection1floor";
+            this.lblElevatorDirection1floor.Size = new System.Drawing.Size(60, 24);
+            this.lblElevatorDirection1floor.TabIndex = 3;
+            this.lblElevatorDirection1floor.Text = " 3 ↓";
             // 
             // level1btnUp
             // 
             this.level1btnUp.BackColor = System.Drawing.Color.White;
-            this.level1btnUp.Location = new System.Drawing.Point(30, 42);
+            this.level1btnUp.Location = new System.Drawing.Point(12, 89);
             this.level1btnUp.Name = "level1btnUp";
             this.level1btnUp.Size = new System.Drawing.Size(50, 49);
             this.level1btnUp.TabIndex = 0;
@@ -163,6 +298,7 @@
             // insideBtnPanel
             // 
             this.insideBtnPanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.insideBtnPanel.Controls.Add(this.lblElevatorDirection);
             this.insideBtnPanel.Controls.Add(this.lblCounter);
             this.insideBtnPanel.Controls.Add(this.lblQueuing);
             this.insideBtnPanel.Controls.Add(this.lblQuery);
@@ -173,6 +309,18 @@
             this.insideBtnPanel.Name = "insideBtnPanel";
             this.insideBtnPanel.Size = new System.Drawing.Size(150, 450);
             this.insideBtnPanel.TabIndex = 0;
+            // 
+            // lblElevatorDirection
+            // 
+            this.lblElevatorDirection.AutoSize = true;
+            this.lblElevatorDirection.BackColor = System.Drawing.Color.Black;
+            this.lblElevatorDirection.Font = new System.Drawing.Font("MS UI Gothic", 14F);
+            this.lblElevatorDirection.ForeColor = System.Drawing.Color.Yellow;
+            this.lblElevatorDirection.Location = new System.Drawing.Point(43, 9);
+            this.lblElevatorDirection.Name = "lblElevatorDirection";
+            this.lblElevatorDirection.Size = new System.Drawing.Size(60, 24);
+            this.lblElevatorDirection.TabIndex = 4;
+            this.lblElevatorDirection.Text = " 3 ↓";
             // 
             // lblCounter
             // 
@@ -245,6 +393,36 @@
             this.floorPanel.Size = new System.Drawing.Size(772, 450);
             this.floorPanel.TabIndex = 1;
             // 
+            // panel4
+            // 
+            this.panel4.Controls.Add(this.doorLeft1floor);
+            this.panel4.Controls.Add(this.doorRight1floor);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panel4.Location = new System.Drawing.Point(0, 0);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(120, 148);
+            this.panel4.TabIndex = 5;
+            // 
+            // panel5
+            // 
+            this.panel5.Controls.Add(this.doorLeft2floor);
+            this.panel5.Controls.Add(this.doorRight2floor);
+            this.panel5.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panel5.Location = new System.Drawing.Point(0, 0);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(120, 148);
+            this.panel5.TabIndex = 4;
+            // 
+            // panel6
+            // 
+            this.panel6.Controls.Add(this.doorLeft3floor);
+            this.panel6.Controls.Add(this.doorRight3floor);
+            this.panel6.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panel6.Location = new System.Drawing.Point(0, 0);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(120, 148);
+            this.panel6.TabIndex = 4;
+            // 
             // FrmElevator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -261,12 +439,20 @@
             this.Load += new System.EventHandler(this.FrmElevator_Load);
             this.Resize += new System.EventHandler(this.FrmElevator_Resize);
             this.floor3panel.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.floor2panel.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.floor1panel.ResumeLayout(false);
-            this.floor1panel.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.insideBtnPanel.ResumeLayout(false);
             this.insideBtnPanel.PerformLayout();
             this.floorPanel.ResumeLayout(false);
+            this.panel4.ResumeLayout(false);
+            this.panel5.ResumeLayout(false);
+            this.panel6.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -289,7 +475,22 @@
         private System.Windows.Forms.Button button2insideLift;
         private System.Windows.Forms.Button button1insideLift;
         private System.Windows.Forms.Panel floorPanel;
+        private System.Windows.Forms.Label lblElevatorDirection3floor;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Panel doorRight3floor;
+        private System.Windows.Forms.Panel doorLeft3floor;
+        private System.Windows.Forms.Panel doorRight2floor;
+        private System.Windows.Forms.Panel doorLeft2floor;
+        private System.Windows.Forms.Label lblElevatorDirection2floor;
+        private System.Windows.Forms.Panel doorRight1floor;
+        private System.Windows.Forms.Panel doorLeft1floor;
+        private System.Windows.Forms.Label lblElevatorDirection1floor;
         private System.Windows.Forms.Label lblElevatorDirection;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Panel panel5;
     }
 }
 

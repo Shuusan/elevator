@@ -32,6 +32,7 @@ namespace Elevator
         private const int ELEVATOR_ROPE_SIZE = 3;
         private const int ELEVATOR_SIZE = 100;
         private const int ELEVATOR_BUTTON_SIZE = 115;
+        private const int DOOR_DELAY = 50;
 
 
         /// *******************************************************************
@@ -42,8 +43,9 @@ namespace Elevator
         private const int ELEVATOR_DOOR_OPEN = 1500;
         private const int ELEVATOR_LIMIT = 30;
 
+
         /// *******************************************************************
-       
+
         /// エレベーターフォーム1のサイズを変更できるようにするためのパラメータ
         /// <summary>
         /// FrmElevatorの高さ
@@ -54,6 +56,7 @@ namespace Elevator
         /// </summary>
         private int intFormWidth;
         private int intLevelPerFloor;
+        private int intElevatorGateWidth;
         //*******************************************************************
         /// ロジック・パラメータ
         /// <summary>
@@ -75,11 +78,13 @@ namespace Elevator
         /// true : 現在エレベーターが動いている。次の目的階は待ち行列になる。
         /// </summary>
         private bool blnIsThreading = false;
+        private bool blnOpeningClosingDoor = false;
         /// <summary>
         /// false : デバッグモードオフ
         /// true : デバッグモードオン
         /// </summary>
         private bool blnIsDebungging = false;
+
 
         /// <summary>
         /// 押されたボタン名をすべてqueQueryThreadingに入れる
@@ -135,6 +140,7 @@ namespace Elevator
             //初期値
             intFormHeight = 500;
             intFormWidth = 1100;
+            intElevatorGateWidth = doorLeft1floor.Width;
 
             intLevelPerFloor = intFormHeight / FLOOR_COUNT - TITLE_BAR_HEIGHT / FLOOR_COUNT;
             CreateBtnProperties();
@@ -379,6 +385,7 @@ namespace Elevator
         {
             intFormHeight = Size.Height;
             intFormWidth = Size.Width;
+            intElevatorGateWidth = doorLeft1floor.Width;
 
             // フォーム（FrmElevator)の画面サイズが下限に収まっているか
             if (intFormHeight < MINIMUM_HEIGHT_SIZE)
@@ -485,6 +492,7 @@ namespace Elevator
         private void ArrivedAtDestination(int destination, int floor)
         {
             SetElevator(destination);
+            OpenElevatorGate();
             Thread.Sleep(ELEVATOR_DOOR_OPEN);
 
             blnIsThreading = false;
@@ -492,7 +500,9 @@ namespace Elevator
 
             if (queQueryThreading.Count == 0)
             {
+                Console.WriteLine("kochi");
                 TurnOffLight(intCurrentQuery);
+                CloseElevatorGate();
                 intCurrentQuery = 0;
                 RefreshInvoke();
             }
@@ -512,7 +522,7 @@ namespace Elevator
         /// </remarks>
         private void MoveWithoutThreading(int floorNumber, int floorTagNumber)
         {
-            if (!blnIsThreading && queQueryThreading.Count == 0)
+            if (!blnIsThreading && queQueryThreading.Count == 0 && !blnOpeningClosingDoor)
             {
                 intCurrentQuery = floorTagNumber;
                 blnIsThreading = true;
@@ -576,6 +586,7 @@ namespace Elevator
         /// </remarks>
         private void TurnOffLight(int currentQuery)
         {
+            
             switch (currentQuery)
             {
 
@@ -678,6 +689,7 @@ namespace Elevator
 
             if(intLevelPerFloor-ELEVATOR_SPEED < elevator.Location.Y && elevator.Location.Y < intLevelPerFloor+ELEVATOR_SPEED && stopAtFloor != 0)
             {
+                OpenElevatorGate();
                 Thread.Sleep(ELEVATOR_DOOR_OPEN);
 
                 
@@ -688,7 +700,9 @@ namespace Elevator
                         TurnOffLight((int)btnProp.enumTag);
                     }
                 }
-                
+                Console.WriteLine("kochi da");
+                CloseElevatorGate();
+
 
                 stopAtFloor = 0;
             }
@@ -808,7 +822,6 @@ namespace Elevator
             
 
             
-            Console.WriteLine(currentHeight / intLevelPerFloor);
             if (isIncrement)
             {
                 return FLOOR_COUNT - (int)Math.Floor(currentHeight / intLevelPerFloor);
@@ -847,17 +860,32 @@ namespace Elevator
             if (intCurrentFloor < intDestinationFloor)
             {
 
-                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↑"));
+                this.Invoke(new Action(() => lblElevatorDirection3floor.Text = intCurrentFloor + " ↑"));
+                this.Invoke(new Action(() => lblElevatorDirection2floor.Text = intCurrentFloor + " ↑"));
+                this.Invoke(new Action(() => lblElevatorDirection1floor.Text = intCurrentFloor + " ↑"));
+                this.Invoke(new Action(() => lblElevatorDirection.Text = intCurrentFloor + " ↑"));
 
             }
             else
             {
-                this.Invoke(new Action(() => lblElevatorDirection.Text = "Elevator direction is currently heading : ↓"));
+                this.Invoke(new Action(() => lblElevatorDirection3floor.Text = intCurrentFloor + " ↓"));
+                this.Invoke(new Action(() => lblElevatorDirection2floor.Text = intCurrentFloor + " ↓"));
+                this.Invoke(new Action(() => lblElevatorDirection1floor.Text = intCurrentFloor + " ↓"));
+                this.Invoke(new Action(() => lblElevatorDirection.Text = intCurrentFloor + " ↓"));
+
+                if(intCurrentFloor == 1)
+                {
+                    this.Invoke(new Action(() => lblElevatorDirection3floor.Text = intCurrentFloor + " ↑"));
+                    this.Invoke(new Action(() => lblElevatorDirection2floor.Text = intCurrentFloor + " ↑"));
+                    this.Invoke(new Action(() => lblElevatorDirection1floor.Text = intCurrentFloor + " ↑"));
+                    this.Invoke(new Action(() => lblElevatorDirection.Text = intCurrentFloor + " ↑"));
+                }
             }
             
             if (!blnIsThreading && queQueryThreading.Count != 0)
             {
                 TurnOffLight(intCurrentQuery);
+                CloseElevatorGate();
 
                 int dequeue = queQueryThreading.Dequeue();
                 intCurrentQuery = dequeue;
@@ -954,7 +982,82 @@ namespace Elevator
             }
             Thread.Sleep(ELEVATOR_DELAY);
         }
+        
+        private void OpenElevatorGate()
+        {
+            switch (intCurrentFloor)
+            {
+                case 1:
+                    blnOpeningClosingDoor = true;
+                    while (doorLeft1floor.Width > 0)
+                    {
+                        this.Invoke(new Action(() => doorLeft1floor.Size = new Size(doorLeft1floor.Width-1, doorLeft1floor.Height)));
+                        this.Invoke(new Action(() => doorRight1floor.Size = new Size(doorLeft1floor.Width-1, doorRight1floor.Height)));
+                        Thread.Sleep(DOOR_DELAY);
+                    }
+                    break;
+                case 2:
+                    blnOpeningClosingDoor = true;
+                    while (doorLeft2floor.Width > 0)
+                    {
+                        this.Invoke(new Action(() => doorLeft2floor.Size = new Size(doorLeft2floor.Width - 1, doorLeft2floor.Height)));
+                        this.Invoke(new Action(() => doorRight2floor.Size = new Size(doorLeft2floor.Width - 1, doorRight2floor.Height)));
+                        Thread.Sleep(DOOR_DELAY);
+                    }
+                    break;
+                case 3:
+                    blnOpeningClosingDoor = true;
+                    while (doorLeft3floor.Width > 0)
+                    {
+                        this.Invoke(new Action(() => doorLeft3floor.Size = new Size(doorLeft3floor.Width - 1, doorLeft3floor.Height)));
+                        this.Invoke(new Action(() => doorRight3floor.Size = new Size(doorLeft3floor.Width - 1, doorRight3floor.Height)));
+                        Thread.Sleep(DOOR_DELAY);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
+        private void CloseElevatorGate()
+        {
+            switch (intCurrentFloor)
+            {
+                case 1:
+                    while (intElevatorGateWidth > doorLeft1floor.Width)
+                    {
+                        this.Invoke(new Action(() => doorLeft1floor.Size = new Size(doorLeft1floor.Width + 1, doorLeft1floor.Height)));
+                        this.Invoke(new Action(() => doorRight1floor.Size = new Size(doorLeft1floor.Width + 1, doorRight1floor.Height)));
+                        Thread.Sleep(DOOR_DELAY);
+                    }
+                    blnOpeningClosingDoor = false;
 
+                    break;
+                case 2:
+                    while (intElevatorGateWidth > doorLeft2floor.Width)
+                    {
+                        this.Invoke(new Action(() => doorLeft2floor.Size = new Size(doorLeft2floor.Width + 1, doorLeft2floor.Height)));
+                        this.Invoke(new Action(() => doorRight2floor.Size = new Size(doorLeft2floor.Width + 1, doorRight2floor.Height)));
+                        Thread.Sleep(DOOR_DELAY);
+                    }
+                    blnOpeningClosingDoor = false;
+
+                    break;
+
+                case 3:
+                    while (intElevatorGateWidth > doorLeft3floor.Width)
+                    {
+                        this.Invoke(new Action(() => doorLeft3floor.Size = new Size(doorLeft3floor.Width + 1, doorLeft3floor.Height)));
+                        this.Invoke(new Action(() => doorRight3floor.Size = new Size(doorLeft3floor.Width + 1, doorRight3floor.Height)));
+                        Thread.Sleep(DOOR_DELAY);
+                    }
+                    blnOpeningClosingDoor = false;
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 }
